@@ -3,9 +3,10 @@ from .models import Task
 
 # Create your views here.
 def index(request):
+    has_tasks = Task.objects.filter(completed=False).exists()
     tasks = Task.objects.filter(completed=False)
     completed_tasks = Task.objects.filter(completed=True)
-    return render(request, 'index.html', {'tasks': tasks, 'completed_tasks': completed_tasks})
+    return render(request, 'index.html', {'tasks': tasks, 'completed_tasks': completed_tasks, 'has_tasks': has_tasks})
 
 def add_task(request):
     if request.method == 'POST':

@@ -120,7 +120,7 @@
         <h1>Task Manager</h1>
 
         <div class="task-list">
-            {% if tasks %}
+            {% if has_tasks %}
                 {% for task in tasks %}
                     <form action="/toggle_task_status" method="POST" style="display: inline;">
                         {% csrf_token %}
