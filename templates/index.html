@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #F4F6F9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2E3A59;
+            font-size: 28px;
+        }
+
+        .task-list {
+            margin: 20px 0;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: #F9F9F9;
+            transition: background-color 0.3s ease;
+        }
+
+        .task-item:hover {
+            background-color: #F1F1F1;
+        }
+
+        .task-item input[type="checkbox"] {
+            margin-right: 15px;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #B4B4B4;
+        }
+
+        .completed-task-list {
+            display: block;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #F1F1F1;
+            border-radius: 8px;
+        }
+
+        .add-task-form {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .add-task-form input {
+            width: 85%;
+            padding: 10px;
+            border: 1px solid #DDD;
+            border-radius: 6px;
+            font-size: 16px;
+            background-color: #F9F9F9;
+            height: 40px;
+            box-sizing: border-box;
+        }
+
+        .add-task-form button {
+            width: 15%;
+            margin-left: 10px;
+            padding: 0;
+            font-size: 15px;
+            background-color: #0078D4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .add-task-form button:hover {
+            background-color: #005A9E;
+        }
+
+        details summary {
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        details[open] .completed-task-list {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Task Manager</h1>
+
+        <div class="task-list">
+            {% if tasks %}
+                {% for task in tasks %}
+                    <form action="/toggle_task_status" method="POST" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="task_id" value="{{ task.id }}">
+                        <div class="task-item">
+                            <input type="checkbox" onchange="this.form.submit()" {% if task.completed %}checked{% endif %}>
+                            <span class="{% if task.completed %}completed{% endif %}">
+                                {{ task.task }}
+                            </span>
+                        </div>
+                    </form>
+                {% endfor %}
+            {% else %}
+                <p>No tasks found</p>
+            {% endif %}
+        </div>
+
+        <details id="completed-tasks-dropdown">
+            <summary>Show Completed Tasks</summary>
+            <div class="completed-task-list">
+                {% if completed_tasks %}
+                    {% for task in completed_tasks %}
+                        <form action="/toggle_task_status" method="POST" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="task_id" value="{{ task.id }}">
+                            <div class="task-item">
+                                <input type="checkbox" onchange="this.form.submit()" checked>
+                                <span class="completed">{{ task.task }}</span>
+                            </div>
+                        </form>
+                    {% endfor %}
+                {% else %}
+                    <p>No completed tasks</p>
+                {% endif %}
+            </div>
+        </details>
+
+        <form action="/add_task" method="POST" class="add-task-form">
+            {% csrf_token %}
+            <input type="text" name="task" placeholder="Add a new task" required>
+            <button type="submit">Add Task</button>
+        </form>
+    </div>
+
+    <script>
+        const dropdown = document.getElementById("completed-tasks-dropdown");
+
+        if (dropdown) {
+            // Check the local storage to see if the dropdown should be open
+            const isOpen = localStorage.getItem("completedTasksDropdownOpen");
+            if (isOpen === "true") {
+                dropdown.open = true;  // Open the dropdown if it was previously open
+            }
+
+            // Add an event listener to save the open/close state in local storage
+            dropdown.addEventListener("toggle", function() {
+                localStorage.setItem("completedTasksDropdownOpen", dropdown.open);
+            });
+        }
+    </script>
+
+</body>
+</html>
