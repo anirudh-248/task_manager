@@ -46,7 +46,10 @@ def register(request):
     return render(request, 'register.html')
 
 def manager(request):
-    has_tasks = Task.objects.filter(user=request.user , completed=False).exists()
+    if request.user.is_authenticated:
+        has_tasks = Task.objects.filter(user=request.user, completed=False).exists()
+    else:
+        has_tasks = False
     tasks = Task.objects.filter(user=request.user, completed=False)
     completed_tasks = Task.objects.filter(user=request.user, completed=True)
     return render(request, 'manager.html', {'tasks': tasks, 'completed_tasks': completed_tasks, 'has_tasks': has_tasks})
